@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- scan="true" scanPeriod="15 seconds" will enable auto scan of this file 
+	after every 15 seconds and if there is any change in file then it will reflect 
+	it -->
+<configuration scan="true" scanPeriod="15 seconds">
+
+	<!-- Logback configuration files support variables,Log file to be created 
+		at -->
+	<property name="LOGS" value="./logs" />
+
+	<!-- Console appender will print the log on console -->
+	<appender name="Console"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<!-- We can set the pattern and highlight whatever required -->
+			<Pattern>
+				%black(%d{ISO8601}) %highlight(%-5level) [%blue(%t)]
+				%yellow(%C{1.}): %msg%n%throwable
+			</Pattern>
+		</layout>
+	</appender>
+
+	<appender name="elk" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+		<destination>localhost:5044</destination>
+		<!-- encoder is required -->
+		<encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+			<providers>
+				<mdc/>
+				<context/>
+				<version/>
+				<logLevel/>
+				<loggerName/>
+				<message/>
+				<!-- provides the fields in the configured pattern -->
+				<pattern>
+					<!-- the pattern that defines what to include -->
+					<pattern>
+						{
+						"appName" : "sample-logger",
+						"indexname" : "sample-index",
+						"class" : "%C{1.}"
+						}
+					</pattern>
+				</pattern>
+				<threadName/>
+				<stackTrace/>
+
+			</providers>
+		</encoder>
+
+	</appender>
+
+	<!-- LOG everything at INFO level -->
+	<root level="info">
+		<appender-ref ref="Console" />
+		<appender-ref ref="elk" />
+	</root>
+
+	<!-- LOG "com.waheedtechblog*" at TRACE level -->
+	<logger name="demo" level="trace"
+		additivity="false">
+		<appender-ref ref="Console" />
+		<appender-ref ref="elk" />
+	</logger>
+
+</configuration>
